@@ -11,6 +11,8 @@ import { RootStore, RootStoreProvider, setupRootStore } from "./models/root-stor
 import { contains } from "ramda"
 import { enableScreens } from "react-native-screens"
 
+import { GoogleSignin } from "@react-native-community/google-signin"
+
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
@@ -46,6 +48,13 @@ Object.defineProperty(ReactNative, "AsyncStorage", {
  */
 const canExit = (routeName: string) => contains(routeName, exitRoutes)
 
+const googleSigninConfigure = async () => {
+  await GoogleSignin.configure({
+    scopes: [],
+    webClientId: "574138143626-9d535pg995uj3fqms5nmks22htal3mrl.apps.googleusercontent.com",
+  })
+}
+
 /**
  * This is the root component of our app.
  */
@@ -53,6 +62,7 @@ export const App: React.FunctionComponent<{}> = () => {
   const [rootStore, setRootStore] = useState<RootStore | undefined>(undefined) // prettier-ignore
   useEffect(() => {
     setupRootStore().then(setRootStore)
+    googleSigninConfigure()
   }, [])
 
   // Before we show the app, we have to wait for our state to be ready.

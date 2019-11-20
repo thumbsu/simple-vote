@@ -3,8 +3,8 @@ import { Image, ImageStyle, Platform, TextStyle, View, ViewStyle } from "react-n
 import { NavigationScreenProps } from "react-navigation"
 import { BulletItem, Button, Header, Text, Screen, Wallpaper } from "../../components"
 import { color, spacing } from "../../theme"
-import { Api } from "../../services/api"
-import { save } from "../../utils/storage"
+import { firebase } from "@react-native-firebase/auth"
+
 export const logoIgnite = require("./logo-ignite.png")
 export const heart = require("./heart.png")
 
@@ -81,43 +81,14 @@ export interface DemoScreenProps extends NavigationScreenProps<{}> {}
 export const DemoScreen: React.FunctionComponent<DemoScreenProps> = props => {
   const goBack = React.useMemo(() => () => props.navigation.goBack(null), [props.navigation])
 
-  const demoReactotron = React.useMemo(
-    () => async () => {
-      console.tron.log("Your Friendly tron log message")
-      console.tron.logImportant("I am important")
-      console.tron.display({
-        name: "DISPLAY",
-        value: {
-          numbers: 1,
-          strings: "strings",
-          booleans: true,
-          arrays: [1, 2, 3],
-          objects: {
-            deeper: {
-              deeper: {
-                yay: "👾",
-              },
-            },
-          },
-          functionNames: function hello() {},
-        },
-        preview: "More control with display()",
-        important: true,
-        image: {
-          uri:
-            "https://avatars2.githubusercontent.com/u/3902527?s=200&u=a0d16b13ed719f35d95ca0f4440f5d07c32c349a&v=4",
-        },
-      })
-      // make an API call for the demo
-      // Don't do API like this, use store's API
-      const demo = new Api()
-      demo.setup()
-      demo.getUser("1")
-      // Let's do some async storage stuff
-      await save("Cool Name", "Boaty McBoatface")
-    },
-    [],
-  )
+  const signOut = async () => {
+    try {
+      await firebase.auth().signOut()
+      props.navigation.navigate("signin")
+    } catch (e) {
+      console.log(e)
+    }
+  }
 
   return (
     <View style={FULL}>
@@ -138,8 +109,8 @@ export const DemoScreen: React.FunctionComponent<DemoScreenProps> = props => {
           <Button
             style={DEMO}
             textStyle={DEMO_TEXT}
-            tx="demoScreen.reactotron"
-            onPress={demoReactotron}
+            text="sign Out"
+            onPress={signOut}
           />
           <Text style={HINT} tx={`demoScreen.${Platform.OS}ReactotronHint`} />
         </View>
