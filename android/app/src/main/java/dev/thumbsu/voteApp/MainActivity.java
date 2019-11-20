@@ -1,4 +1,4 @@
-package com.voteapp;
+package dev.thumbsu.voteApp;
 
 import com.facebook.react.ReactActivity;
 

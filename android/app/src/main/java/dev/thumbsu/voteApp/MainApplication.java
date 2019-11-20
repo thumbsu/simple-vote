@@ -1,4 +1,4 @@
-package com.voteapp;
+package dev.thumbsu.voteApp;
 
 import android.app.Application;
 import android.content.Context;
