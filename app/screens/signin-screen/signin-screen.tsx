@@ -7,6 +7,7 @@ import { color, spacing } from "../../theme"
 import { NavigationScreenProps } from "react-navigation"
 import { GoogleSignin } from "@react-native-community/google-signin"
 import { firebase } from "@react-native-firebase/auth"
+import database from "@react-native-firebase/database"
 
 export interface SigninScreenProps extends NavigationScreenProps<{}> {}
 
@@ -73,6 +74,17 @@ export const SigninScreen: React.FunctionComponent<SigninScreenProps> = observer
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken)
       await firebase.auth().signInWithCredential(credential)
       const user = firebase.auth().currentUser
+
+      const ref = database().ref(`/users/${user.uid}`)
+      const snapshot = await ref.once("value")
+
+      if (!snapshot.val()) {
+        await ref.set({
+          uid: user.uid,
+          name: user.displayName,
+          role: "member",
+        })
+      }
 
       if (user) {
         props.navigation.navigate("primary")

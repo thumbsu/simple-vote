@@ -12,6 +12,7 @@ import { contains } from "ramda"
 import { enableScreens } from "react-native-screens"
 
 import { GoogleSignin } from "@react-native-community/google-signin"
+import database from '@react-native-firebase/database';
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -54,6 +55,9 @@ const googleSigninConfigure = async () => {
     webClientId: "574138143626-9d535pg995uj3fqms5nmks22htal3mrl.apps.googleusercontent.com",
   })
 }
+ 
+database().setPersistenceEnabled(true);
+database().setPersistenceCacheSizeBytes(2000000); // 2MB
 
 /**
  * This is the root component of our app.
