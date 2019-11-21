@@ -7,10 +7,10 @@
   "errors": {
     "invalidEmail": "Invalid email address."
   },
-  "welcomeScreen": {
-    "poweredBy": "POWERED BY BOWSER",
+  "votelistScreen": {
+    "miniTitle": "create and vote 🗳",
     "readyForLaunch": "Ready for launch.",
-    "continue": "CONTINUE"
+    "makeVoteButton": "CREATE A VOTE"
   },
   "demoScreen": {
     "howTo": "HOW TO",
