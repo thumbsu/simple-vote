@@ -39,6 +39,7 @@ function ScreenWithScrolling(props: ScreenProps) {
       <StatusBar barStyle={props.statusBar || "light-content"} />
       <Wrapper style={[preset.outer, backgroundStyle]}>
         <ScrollView
+          refreshControl={props.refreshControl}
           style={[preset.outer, backgroundStyle]}
           contentContainerStyle={[preset.inner, style]}
         >

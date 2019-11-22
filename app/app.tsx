@@ -14,6 +14,9 @@ import { enableScreens } from "react-native-screens"
 import { GoogleSignin } from "@react-native-community/google-signin"
 import database from '@react-native-firebase/database';
 
+import { Buffer } from 'buffer';
+global.Buffer = Buffer; // very important
+
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator

@@ -1,4 +1,4 @@
-import { ViewStyle } from "react-native"
+import { ViewStyle, RefreshControlProps } from "react-native"
 import { KeyboardOffsets, ScreenPresets } from "./screen.presets"
 
 export interface ScreenProps {
@@ -36,4 +36,9 @@ export interface ScreenProps {
    * By how much should we offset the keyboard? Defaults to none.
    */
   keyboardOffset?: KeyboardOffsets
+
+  /**
+   * Scrollview's refreshControl
+   */
+  refreshControl?: React.ReactElement<RefreshControlProps>
 }

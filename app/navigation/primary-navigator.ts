@@ -1,10 +1,10 @@
 import createNativeStackNavigator from "react-native-screens/createNativeStackNavigator"
-import { DemoScreen, VotelistScreen } from "../screens"
+import { VotelistScreen, CreateVoteScreen } from "../screens"
 
 export const PrimaryNavigator = createNativeStackNavigator(
   {
     votelist: { screen: VotelistScreen },
-    demo: { screen: DemoScreen },
+    createVote: { screen: CreateVoteScreen },
   },
   {
     headerMode: "none",
@@ -18,4 +18,4 @@ export const PrimaryNavigator = createNativeStackNavigator(
  * Anything not on this list will be a standard `back` action in
  * react-navigation.
  */
-export const exitRoutes: string[] = ["welcome"]
+export const exitRoutes: string[] = ["votelist"]
