@@ -5,7 +5,10 @@ PODS:
   - AppAuth/Core (1.2.0)
   - AppAuth/ExternalUserAgent (1.2.0)
   - boost-for-react-native (1.63.0)
+  - Crashlytics (3.12.0):
+    - Fabric (~> 1.9.0)
   - DoubleConversion (1.1.6)
+  - Fabric (1.9.0)
   - FBLazyVector (0.61.2)
   - FBReactNativeSpec (0.61.2):
     - Folly (= 2018.10.22.00)
@@ -331,6 +334,12 @@ PODS:
     - Firebase/Core (~> 6.8.1)
     - React
     - RNFBApp
+  - RNFBCrashlytics (6.0.4):
+    - Crashlytics (~> 3.12.0)
+    - Fabric (~> 1.9.0)
+    - Firebase/Core (~> 6.8.1)
+    - React
+    - RNFBApp
   - RNFBDatabase (6.0.4):
     - Firebase/Core (~> 6.8.1)
     - Firebase/Database (~> 6.8.1)
@@ -383,6 +392,7 @@ DEPENDENCIES:
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
+  - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
   - "RNFBDatabase (from `../node_modules/@react-native-firebase/database`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-community/google-signin`)"
@@ -395,6 +405,8 @@ SPEC REPOS:
   trunk:
     - AppAuth
     - boost-for-react-native
+    - Crashlytics
+    - Fabric
     - Firebase
     - FirebaseAnalytics
     - FirebaseAuth
@@ -473,6 +485,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBAuth:
     :path: "../node_modules/@react-native-firebase/auth"
+  RNFBCrashlytics:
+    :path: "../node_modules/@react-native-firebase/crashlytics"
   RNFBDatabase:
     :path: "../node_modules/@react-native-firebase/database"
   RNGestureHandler:
@@ -491,7 +505,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: bce82c76043657c99d91e7882e8a9e1a93650cd4
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
+  Crashlytics: 07fb167b1694128c1c9a5a5cc319b0e9c3ca0933
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
+  Fabric: f988e33c97f08930a413e08123064d2e5f68d655
   FBLazyVector: 68b6a76960fbd8ecd9fb7ce0aadd3329c3340a99
   FBReactNativeSpec: 5a764c60abdc3336a213e5310c40b74741f32839
   Firebase: 9cbe4e5b5eaafa05dc932be58b7c8c3820d71e88
@@ -538,6 +554,7 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 9db00606d689f5653f08aa601c81b9d3266a0a19
   RNFBApp: cce40af7fd9a8bc12858ce5ec21e20ac7987e0ca
   RNFBAuth: 3b4847dd59141f4c7ad59eee50a37347f3db8eb7
+  RNFBCrashlytics: 662f3b34926cb682147e04215b154cfa6d2880c0
   RNFBDatabase: 4db24df43ee682567cfc6f882cd05de6e5f4c752
   RNGestureHandler: a4ddde1ffc6e590c8127b8b7eabfdade45475c74
   RNGoogleSignin: a10b849c165088c737d4465de6c2062f24d06002

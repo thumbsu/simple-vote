@@ -296,6 +296,8 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				95110469A695FF6677BC7FA7 /* [CP-User] [RNFB] Core Configuration */,
 				6D39303456625F8BCB1C98AC /* [CP] Copy Pods Resources */,
+				529B4FC7230B3C0E58C95BBD /* [CP-User] [RNFB] Crashlytics Configuration */,
+				13DFF3A02387E95700EA8157 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -463,6 +465,23 @@
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
 		};
+		13DFF3A02387E95700EA8157 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${PODS_ROOT}/Fabric/run\"\n";
+		};
 		205754FC06A65E28949FD9FE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -498,6 +517,16 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+		};
+		529B4FC7230B3C0E58C95BBD /* [CP-User] [RNFB] Crashlytics Configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] [RNFB] Crashlytics Configuration";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/usr/bin/env bash\n#\n# Copyright (c) 2016-present Invertase Limited & Contributors\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this library except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#   http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\nset -e\n\nif [[ ${PODS_ROOT} ]]; then\n  echo \"info: Exec Fabric Run from Pods\"\n  ${PODS_ROOT}/Fabric/run\nelse\n  echo \"info: Exec Fabric Run from framework\"\n  ${PROJECT_DIR}/Fabric.framework/run\nfi\n";
 		};
 		6D39303456625F8BCB1C98AC /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;

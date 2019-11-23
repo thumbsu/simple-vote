@@ -8,13 +8,15 @@ import {
   SafeAreaView,
   Alert,
   RefreshControl,
+  Platform,
+  TouchableOpacity,
 } from "react-native"
 import { NavigationScreenProps } from "react-navigation"
 import { Button, Header, Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
-import { TouchableOpacity } from "react-native-gesture-handler"
 import { firebase } from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
+import prompt from "react-native-prompt-android"
 
 const like = require("./like.png")
 const fire = require("./fire.png")
@@ -162,11 +164,13 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
     const currentUser = firebase.auth().currentUser
     setUser(currentUser)
 
+    setRefreshing(true)
     const ref = database().ref("votes")
     ref.on("value", onVoteListChange)
+    setRefreshing(false)
 
     return () => ref.off("value", onVoteListChange)
-  }, [refreshing])
+  }, [])
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true)
@@ -200,7 +204,11 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
       return item
     })
 
-    oldVote.voter = [user.uid]
+    if (oldVote.voter) {
+      oldVote.voter.push(user.uid)
+    } else {
+      oldVote.voter = [user.uid]
+    }
 
     const ref = database().ref(`votes/${oldVote.id}`)
     const snapshot = await ref.once("value")
@@ -226,19 +234,31 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
         {
           text: "제목 수정하기",
           onPress: () => {
-            Alert.prompt("수정하기", "투표 제목을 수정하세요.", async text => {
-              console.log(text)
-              const ref = database().ref(`votes/${vote.id}`)
-              const snapshot = await ref.once("value")
+            Platform.OS === "ios"
+              ? Alert.prompt("수정하기", "투표 제목을 수정하세요.", async text => {
+                  const ref = database().ref(`votes/${vote.id}`)
+                  const snapshot = await ref.once("value")
 
-              if (snapshot.val()) {
-                try {
-                  await ref.update({ ...vote, title: text })
-                } catch (e) {
-                  Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
-                }
-              }
-            })
+                  if (snapshot.val()) {
+                    try {
+                      await ref.update({ ...vote, title: text })
+                    } catch (e) {
+                      Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                    }
+                  }
+                })
+              : prompt("수정하기", "투표 제목을 수정하세요.", async text => {
+                  const ref = database().ref(`votes/${vote.id}`)
+                  const snapshot = await ref.once("value")
+
+                  if (snapshot.val()) {
+                    try {
+                      await ref.update({ ...vote, title: text })
+                    } catch (e) {
+                      Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                    }
+                  }
+                })
           },
         },
         {

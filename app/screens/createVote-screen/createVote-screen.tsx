@@ -1,10 +1,17 @@
 import * as React from "react"
-import { Platform, TextStyle, View, ViewStyle, SafeAreaView, Alert } from "react-native"
+import {
+  Platform,
+  TextStyle,
+  View,
+  ViewStyle,
+  SafeAreaView,
+  Alert,
+  TouchableOpacity,
+} from "react-native"
 import { NavigationScreenProps } from "react-navigation"
 import { Button, Header, Text, Screen, TextField } from "../../components"
 import { color, spacing } from "../../theme"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import { TouchableOpacity } from "react-native-gesture-handler"
 import { firebase } from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
 import uuid from "react-native-uuid"
