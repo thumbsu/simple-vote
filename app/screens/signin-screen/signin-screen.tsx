@@ -98,7 +98,7 @@ export const SigninScreen: React.FunctionComponent<SigninScreenProps> = observer
   return (
     <View style={FULL}>
       <Screen style={CONTAINER} backgroundColor={color.transparent} statusBar="dark-content">
-        <Header headerText="simple vote app 🗳" style={HEADER} titleStyle={HEADER_TITLE} />
+        <Header headerText="Simple Vote! 🗳" style={HEADER} titleStyle={HEADER_TITLE} />
         <Text style={TITLE} text="Welcome everyone!" />
         <Text style={SUB_TITLE} text="🔻Log in with Google and try.🔻" />
         <Button

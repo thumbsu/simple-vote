@@ -2,9 +2,6 @@ import * as React from "react"
 import {
   View,
   Image,
-  ViewStyle,
-  TextStyle,
-  ImageStyle,
   SafeAreaView,
   Alert,
   RefreshControl,
@@ -17,123 +14,22 @@ import { color, spacing } from "../../theme"
 import { firebase } from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
 import prompt from "react-native-prompt-android"
+import * as styles from "./styles"
 
 const like = require("./like.png")
 const fire = require("./fire.png")
 const crown = require("./crown.png")
 
-const FULL: ViewStyle = { flex: 1 }
-const CONTAINER: ViewStyle = {
-  backgroundColor: color.transparent,
-  paddingHorizontal: spacing[4],
-}
-const TEXT: TextStyle = {
-  color: color.palette.black,
-  fontFamily: "Montserrat",
-}
-const BOLD: TextStyle = { fontWeight: "bold" }
-const HEADER: TextStyle = {
-  paddingTop: spacing[3],
-  paddingBottom: spacing[4] + spacing[1],
-  paddingHorizontal: 0,
-}
-const HEADER_TITLE: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 12,
-  lineHeight: 15,
-  textAlign: "center",
-  letterSpacing: 1.5,
-}
-const VOTE_CONTAINER: ViewStyle = {
-  marginTop: 20,
-}
-const VOTE_HEADER: ViewStyle = {
-  paddingVertical: 10,
-}
-const VOTE_HEADER_STATUS: ViewStyle = {
-  flexDirection: "row",
-  alignItems: "center",
-}
-const VOTE_HEADER_TEXT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 22,
-  letterSpacing: 1.2,
-}
-const VOTE_STATUS_ACTIVE: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 13,
-}
-const VOTE_FIRE: ImageStyle = {
-  width: 13,
-  height: 13,
-  resizeMode: "contain",
-}
-const VOTE_STATUS_INACTIVE: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 13,
-}
-const VOTE_ITEM_INACTIVE: ViewStyle = {
-  marginVertical: 5,
-  padding: 8,
-  borderLeftWidth: 2,
-  borderBottomWidth: 2,
-  borderLeftColor: color.palette.lightPink,
-  borderBottomColor: color.palette.lightPink,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-}
-const VOTE_ITEM_ACTIVE: ViewStyle = {
-  padding: 12,
-  backgroundColor: color.palette.lightPink,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-}
-const VOTE_ITEM_TEXT: TextStyle = {
-  ...TEXT,
-  fontSize: 18,
-}
-const VOTE_ITEM_COUNT_WRAP: ViewStyle = {
-  flexDirection: "row",
-  alignItems: "center",
-}
-const VOTE_LIKE: ImageStyle = {
-  width: 18,
-  height: 18,
-  resizeMode: "contain",
-}
-const VOTE_COUNT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 18,
-  marginLeft: 10,
-}
-const MAKE_VOTE_BUTTON: ViewStyle = {
-  paddingVertical: spacing[4],
-  paddingHorizontal: spacing[4],
-  backgroundColor: color.palette.lightPink,
-}
-const MAKE_VOTE_BUTTON_TEXT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 13,
-  letterSpacing: 2,
-}
-const FOOTER: ViewStyle = { backgroundColor: color.palette.babyPink }
-const FOOTER_CONTENT: ViewStyle = {
-  paddingVertical: spacing[4],
-  paddingHorizontal: spacing[4],
-}
-
 const wait = (timeout: number) => {
   return new Promise(resolve => {
     setTimeout(resolve, timeout)
   })
+}
+
+const dateformat = (timestamp: number) => {
+  const date = new Date(timestamp)
+  return `${date.getFullYear()}년 ${date.getMonth() +
+    1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`
 }
 
 export interface VotelistScreenProps extends NavigationScreenProps<{}> {}
@@ -156,6 +52,16 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
         })
       })
     }
+
+    list.sort((a, b) => {
+      if (a.startTime.timestamp > b.startTime.timestamp) {
+        return -1
+      }
+      if (a.startTime.timestamp < b.startTime.timestamp) {
+        return 1
+      }
+      return 0
+    })
 
     setVotes(list)
   }
@@ -223,10 +129,6 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
   }
 
   const manageVote = async (vote: any) => {
-    if (vote.deadline.timestamp < new Date().getTime()) {
-      return Alert.alert("이미 종료된 투표입니다.")
-    }
-
     Alert.alert(
       "설정하기",
       "투표 제목을 수정하고 삭제할 수 있습니다.",
@@ -280,115 +182,170 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
     )
   }
 
-  const renderEndVoteItems = voteItems => {
+  const renderEndVoteItems = vote => {
     let max = 0
     let highScoreItem = ""
-    voteItems.forEach(item => {
+    let result
+    vote.items.forEach(item => {
       if (item.count > max) {
         max = item.count
         highScoreItem = item.value
       }
     })
 
-    if (max === 0) {
-      return voteItems.map(item => {
-        return (
-          <View
-            key={`${item.value}${item.count}`}
-            style={
-              item.voter && item.voter.includes(user.uid) ? VOTE_ITEM_ACTIVE : VOTE_ITEM_INACTIVE
-            }
-          >
-            <Text style={VOTE_ITEM_TEXT} text={item.value} />
-            <View style={VOTE_ITEM_COUNT_WRAP}>
-              {item.voter && item.voter.includes(user.uid) && (
-                <Image source={like} style={VOTE_LIKE} />
-              )}
-              <Text style={VOTE_COUNT} text={item.count || "0"} />
+    if (!vote.voter || vote.voter.length % vote.items.length === max || max === 0) {
+      // 모두 똑같은 투표 수거나 아무도 투표를 하지 않음
+      result = (
+        <View>
+          <Text
+            text="투표 결과"
+            style={{ ...styles.TEXT, ...styles.BOLD, marginBottom: spacing[3] }}
+          />
+          <View style={styles.VOTE_ITEM_ACTIVE}>
+            <Text style={styles.VOTE_ITEM_TEXT} text="승자가 없네요ㅠㅠ" />
+            <View style={styles.VOTE_ITEM_COUNT_WRAP}>
+              <Image source={crown} style={styles.VOTE_LIKE} />
             </View>
           </View>
-        )
-      })
+        </View>
+      )
+    } else {
+      result = (
+        <View>
+          <Text
+            text="투표 결과"
+            style={{ ...styles.TEXT, ...styles.BOLD, marginBottom: spacing[3] }}
+          />
+          <View style={styles.VOTE_ITEM_ACTIVE}>
+            <Text style={styles.VOTE_ITEM_TEXT} text={highScoreItem} />
+            <View style={styles.VOTE_ITEM_COUNT_WRAP}>
+              <Image source={crown} style={styles.VOTE_LIKE} />
+              <Text style={styles.VOTE_COUNT} text={`${max}`} />
+            </View>
+          </View>
+        </View>
+      )
     }
 
     return (
-      <View style={VOTE_ITEM_ACTIVE}>
-        <Text style={VOTE_ITEM_TEXT} text={highScoreItem} />
-        <View style={VOTE_ITEM_COUNT_WRAP}>
-          <Image source={crown} style={VOTE_LIKE} />
-          <Text style={VOTE_COUNT} text={`${max}`} />
+      <View>
+        {result}
+        <View style={{ marginTop: spacing[4] }}>
+          <Text
+            text="투표 항목"
+            style={{ ...styles.TEXT, ...styles.BOLD, marginBottom: spacing[3] }}
+          />
+          {vote.items.map(item => {
+            return (
+              <View
+                key={`${item.value}${item.count}`}
+                style={
+                  item.voter && item.voter.includes(user.uid)
+                    ? styles.VOTE_ITEM_ACTIVE
+                    : styles.VOTE_ITEM_INACTIVE
+                }
+              >
+                <Text style={styles.VOTE_ITEM_TEXT} text={item.value} />
+                <View style={styles.VOTE_ITEM_COUNT_WRAP}>
+                  {item.voter && item.voter.includes(user.uid) && (
+                    <Image source={like} style={styles.VOTE_LIKE} />
+                  )}
+                  <Text style={styles.VOTE_COUNT} text={item.count || "0"} />
+                </View>
+              </View>
+            )
+          })}
         </View>
       </View>
     )
   }
 
+  const renderProgressVoteItems = vote => {
+    return vote.items.map((item: any) => {
+      return (
+        <TouchableOpacity
+          key={`${item.value}${item.count}`}
+          style={
+            item.voter && item.voter.includes(user.uid)
+              ? styles.VOTE_ITEM_ACTIVE
+              : styles.VOTE_ITEM_INACTIVE
+          }
+          onPress={() => {
+            voteOnItem(vote.key, item.key)
+          }}
+        >
+          <Text style={styles.VOTE_ITEM_TEXT} text={item.value} />
+          <View style={styles.VOTE_ITEM_COUNT_WRAP}>
+            {item.voter && item.voter.includes(user.uid) && (
+              <Image source={like} style={styles.VOTE_LIKE} />
+            )}
+            <Text style={styles.VOTE_COUNT} text={item.count || "0"} />
+          </View>
+        </TouchableOpacity>
+      )
+    })
+  }
+
   return (
-    <View style={FULL}>
+    <View style={styles.FULL}>
       <Screen
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        style={CONTAINER}
+        style={styles.CONTAINER}
         preset="scroll"
         backgroundColor={color.palette.lighterPink}
       >
-        <Header headerText="투표를 만들고 참여하세요 🗳" style={HEADER} titleStyle={HEADER_TITLE} />
+        <Header
+          headerText="투표를 만들고 참여하세요 🗳"
+          style={styles.HEADER}
+          titleStyle={styles.HEADER_TITLE}
+        />
         {votes &&
           votes.map((vote: any) => {
             return (
-              <View key={vote.key} style={VOTE_CONTAINER}>
-                <View style={VOTE_HEADER}>
-                  <View style={{ ...VOTE_HEADER_STATUS, justifyContent: "space-between" }}>
-                    {vote.deadline.timestamp > new Date().getTime() ? (
-                      <View style={VOTE_HEADER_STATUS}>
-                        <Text style={VOTE_STATUS_ACTIVE} text="진행중" />
-                        <Image source={fire} style={VOTE_FIRE} />
-                      </View>
-                    ) : (
-                      <View style={VOTE_HEADER_STATUS}>
-                        <Text style={VOTE_STATUS_INACTIVE} text="종료됨" />
-                      </View>
-                    )}
+              <View key={vote.key} style={styles.VOTE_CONTAINER}>
+                <View style={styles.VOTE_HEADER}>
+                  <View style={{ ...styles.VOTE_HEADER_STATUS, justifyContent: "space-between" }}>
+                    <View style={styles.VOTE_HEADER_STATUS}>
+                      {vote.deadline.timestamp > new Date().getTime() ? (
+                        <>
+                          <Text style={styles.VOTE_STATUS_ACTIVE} text="진행중" />
+                          <Image source={fire} style={styles.VOTE_FIRE} />
+                        </>
+                      ) : (
+                        <Text style={styles.VOTE_STATUS_INACTIVE} text="종료됨" />
+                      )}
+                    </View>
                     {vote.uid === user.uid && (
                       <TouchableOpacity onPress={() => manageVote(vote)}>
-                        <Text style={VOTE_STATUS_ACTIVE} text="투표 설정" />
+                        <Text style={styles.VOTE_STATUS_ACTIVE} text="투표 설정" />
                       </TouchableOpacity>
                     )}
                   </View>
-                  <Text style={VOTE_HEADER_TEXT} text={vote.title} />
+                  <Text style={styles.VOTE_HEADER_TEXT} text={vote.title} />
+                  <View>
+                    <Text
+                      text={`투표 시작: ${dateformat(vote.startTime.timestamp)}`}
+                      style={styles.VOTE_INFO}
+                    />
+                    <Text
+                      text={`투표 마감: ${dateformat(vote.deadline.timestamp)}`}
+                      style={styles.VOTE_INFO}
+                    />
+                    <Text text={`생성자: ${vote.author}`} style={styles.VOTE_INFO} />
+                  </View>
                 </View>
                 {vote.deadline.timestamp < new Date().getTime()
-                  ? renderEndVoteItems(vote.items)
-                  : vote.items.map((item: any) => {
-                      return (
-                        <TouchableOpacity
-                          key={`${item.value}${item.count}`}
-                          style={
-                            item.voter && item.voter.includes(user.uid)
-                              ? VOTE_ITEM_ACTIVE
-                              : VOTE_ITEM_INACTIVE
-                          }
-                          onPress={() => {
-                            voteOnItem(vote.key, item.key)
-                          }}
-                        >
-                          <Text style={VOTE_ITEM_TEXT} text={item.value} />
-                          <View style={VOTE_ITEM_COUNT_WRAP}>
-                            {item.voter && item.voter.includes(user.uid) && (
-                              <Image source={like} style={VOTE_LIKE} />
-                            )}
-                            <Text style={VOTE_COUNT} text={item.count || "0"} />
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    })}
+                  ? renderEndVoteItems(vote)
+                  : renderProgressVoteItems(vote)}
               </View>
             )
           })}
       </Screen>
-      <SafeAreaView style={FOOTER}>
-        <View style={FOOTER_CONTENT}>
+      <SafeAreaView style={styles.FOOTER}>
+        <View style={styles.FOOTER_CONTENT}>
           <Button
-            style={MAKE_VOTE_BUTTON}
-            textStyle={MAKE_VOTE_BUTTON_TEXT}
+            style={styles.MAKE_VOTE_BUTTON}
+            textStyle={styles.MAKE_VOTE_BUTTON_TEXT}
             text="투표 생성"
             onPress={nextScreen}
           />

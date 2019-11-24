@@ -121,11 +121,19 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
     { key: uuid.v4(), value: "", count: 0 },
   ])
 
+  const dateformat = (date: Date) =>
+    `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`
+
   const _setSd = (e, changeDate) => {
     changeDate = changeDate || sd
+    if (changeDate < new Date()) {
+      Alert.alert("과거의 시간을 선택할 수 없습니다.")
+      return
+    }
     if (Platform.OS !== "ios") setSdShow(false)
     setSd(changeDate)
-    setDl(new Date(new Date().setHours(changeDate.getHours() + 7)))
+    const newDl = new Date(changeDate)
+    setDl(new Date(newDl.setHours(newDl.getHours() + 7)))
   }
 
   const _setSdMode = changeMode => {
@@ -182,17 +190,18 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
     const data = {
       id,
       uid: user.uid,
+      author: user.displayName,
       title: title,
       items,
       startTime: {
         day: sd.getDate(),
-        month: sd.getMonth(),
+        month: sd.getMonth() + 1,
         year: sd.getFullYear(),
         timestamp: sd.getTime(),
       },
       deadline: {
         day: dl.getDate(),
-        month: dl.getMonth(),
+        month: dl.getMonth() + 1,
         year: dl.getFullYear(),
         timestamp: dl.getTime(),
       },
@@ -256,7 +265,7 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
         <Text text="시작시간 설정" style={VOTE_ITEM_TITLE} />
         <View style={VOTE_TIME_SETTING}>
           <TouchableOpacity onPress={() => _setSdMode("date")}>
-            <Text text={sd.toLocaleDateString()} style={VOTE_DATE_TEXT} />
+            <Text text={dateformat(sd)} style={VOTE_DATE_TEXT} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => _setSdMode("time")}>
             <Text text={sd.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
@@ -277,7 +286,7 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
         <Text text="마감시간 설정" style={VOTE_ITEM_TITLE} />
         <View style={VOTE_TIME_SETTING}>
           <TouchableOpacity onPress={() => _setDlMode("date")}>
-            <Text text={dl.toLocaleDateString()} style={VOTE_DATE_TEXT} />
+            <Text text={dateformat(dl)} style={VOTE_DATE_TEXT} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => _setDlMode("time")}>
             <Text text={dl.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
