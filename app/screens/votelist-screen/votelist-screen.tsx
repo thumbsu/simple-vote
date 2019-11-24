@@ -87,6 +87,11 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
   const voteOnItem = async (voteKey: string, itemKey: string) => {
     const oldVote = votes.filter(v => v.key === voteKey)[0]
 
+    if (oldVote.startTime.timestamp > new Date().getTime()) {
+      Alert.alert("아직 투표가 시작되지 않았습니다!")
+      return
+    }
+
     if (oldVote.deadline.timestamp < new Date().getTime()) {
       Alert.alert("이미 종료된 투표입니다!")
       return
