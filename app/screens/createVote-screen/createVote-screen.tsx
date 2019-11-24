@@ -126,11 +126,16 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
 
   const _setSd = (e, changeDate) => {
     changeDate = changeDate || sd
+    if (Platform.OS !== "ios") setSdShow(false)
+    
+    if (sdMode === "time") {
+      changeDate = new Date(new Date(changeDate).setFullYear(sd.getFullYear(), sd.getMonth(), sd.getDate()))
+    }
+
     if (changeDate < new Date()) {
       Alert.alert("과거의 시간을 선택할 수 없습니다.")
       return
     }
-    if (Platform.OS !== "ios") setSdShow(false)
     setSd(changeDate)
     const newDl = new Date(changeDate)
     setDl(new Date(newDl.setHours(newDl.getHours() + 7)))
@@ -144,6 +149,15 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
   const _setDl = (e, changeDate) => {
     changeDate = changeDate || dl
     if (Platform.OS !== "ios") setDlShow(false)
+    
+    if (dlMode === "time") {
+      changeDate = new Date(new Date(changeDate).setFullYear(dl.getFullYear(), dl.getMonth(), dl.getDate()))
+    }
+
+    if (changeDate <= sd) {
+      Alert.alert("시작시간 이후의 시간을 선택해주세요.")
+      return
+    }
     setDl(changeDate)
   }
 
