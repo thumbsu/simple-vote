@@ -55,13 +55,15 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
 
     list.sort((a, b) => {
       if (a.startTime.timestamp > b.startTime.timestamp) {
-        return -1
+        return 1
       }
       if (a.startTime.timestamp < b.startTime.timestamp) {
-        return 1
+        return -1
       }
       return 0
     })
+
+    console.log(list)
 
     setVotes(list)
   }
