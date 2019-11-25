@@ -2,6 +2,10 @@
 
 간단한 투표 앱입니다. 투표를 생성하고 투표에 참여할 수 있습니다.
 
+### release
+
+[안드로이드 apk 다운로드 받기](https://github.com/thumbsu/simple-vote/releases)
+
 ### 기능
 
 1. 구글 로그인
