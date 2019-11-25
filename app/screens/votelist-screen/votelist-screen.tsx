@@ -5,7 +5,6 @@ import {
   SafeAreaView,
   Alert,
   RefreshControl,
-  Platform,
   TouchableOpacity,
 } from "react-native"
 import { NavigationScreenProps } from "react-navigation"
@@ -13,7 +12,6 @@ import { Button, Header, Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
 import { firebase } from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
-import prompt from "react-native-prompt-android"
 import * as styles from "./styles"
 
 const like = require("./like.png")
@@ -62,8 +60,6 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
       }
       return 0
     })
-
-    console.log(list)
 
     setVotes(list)
   }
@@ -141,34 +137,10 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
       "투표 제목을 수정하고 삭제할 수 있습니다.",
       [
         {
-          text: "제목 수정하기",
-          onPress: () => {
-            Platform.OS === "ios"
-              ? Alert.prompt("수정하기", "투표 제목을 수정하세요.", async text => {
-                  const ref = database().ref(`votes/${vote.id}`)
-                  const snapshot = await ref.once("value")
-
-                  if (snapshot.val()) {
-                    try {
-                      await ref.update({ ...vote, title: text })
-                    } catch (e) {
-                      Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
-                    }
-                  }
-                })
-              : prompt("수정하기", "투표 제목을 수정하세요.", async text => {
-                  const ref = database().ref(`votes/${vote.id}`)
-                  const snapshot = await ref.once("value")
-
-                  if (snapshot.val()) {
-                    try {
-                      await ref.update({ ...vote, title: text })
-                    } catch (e) {
-                      Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
-                    }
-                  }
-                })
-          },
+          text: "수정하기",
+          onPress: () => props.navigation.navigate("createVote", {
+            voteKey: vote.key
+          })
         },
         {
           text: "삭제하기",

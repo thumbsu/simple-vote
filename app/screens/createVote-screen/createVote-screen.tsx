@@ -108,6 +108,7 @@ export interface CreateVoteScreenProps extends NavigationScreenProps<{}> {}
 export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = props => {
   const goBack = React.useMemo(() => () => props.navigation.goBack(null), [props.navigation])
 
+  const [voteKey, setVoteKey] = React.useState(null)
   const [sd, setSd] = React.useState(new Date())
   const [sdShow, setSdShow] = React.useState(false)
   const [sdMode, setSdMode] = React.useState("date")
@@ -121,15 +122,40 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
     { key: uuid.v4(), value: "", count: 0 },
   ])
 
+  React.useEffect(() => {
+    // @ts-ignore
+    const key = props.navigation.getParam("voteKey", undefined)
+
+    if (key) {
+      getVote(key)
+      setVoteKey(key)
+    }
+  }, [props.navigation])
+
+  const getVote = async (key: string) => {
+    const ref = database().ref(`votes/${key}`)
+    const snapshot = await ref.once("value")
+
+    if (snapshot.val()) {
+      const vote = snapshot.val()
+      setDl(new Date(vote.deadline.timestamp))
+      setSd(new Date(vote.startTime.timestamp))
+      setTitle(vote.title)
+      setItems(vote.items)
+    }
+  }
+
   const dateformat = (date: Date) =>
     `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`
 
   const _setSd = (e, changeDate) => {
     changeDate = changeDate || sd
     if (Platform.OS !== "ios") setSdShow(false)
-    
+
     if (sdMode === "time") {
-      changeDate = new Date(new Date(changeDate).setFullYear(sd.getFullYear(), sd.getMonth(), sd.getDate()))
+      changeDate = new Date(
+        new Date(changeDate).setFullYear(sd.getFullYear(), sd.getMonth(), sd.getDate()),
+      )
     }
 
     if (changeDate < new Date()) {
@@ -149,9 +175,11 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
   const _setDl = (e, changeDate) => {
     changeDate = changeDate || dl
     if (Platform.OS !== "ios") setDlShow(false)
-    
+
     if (dlMode === "time") {
-      changeDate = new Date(new Date(changeDate).setFullYear(dl.getFullYear(), dl.getMonth(), dl.getDate()))
+      changeDate = new Date(
+        new Date(changeDate).setFullYear(dl.getFullYear(), dl.getMonth(), dl.getDate()),
+      )
     }
 
     if (changeDate <= sd) {
@@ -200,7 +228,7 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
       return
     }
 
-    const id = uuid.v1()
+    const id = voteKey || uuid.v1()
     const data = {
       id,
       uid: user.uid,
@@ -220,7 +248,14 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
         timestamp: dl.getTime(),
       },
     }
-    const ref = database().ref(`votes/${id}`)
+
+    let ref
+    if (voteKey) {
+      ref = database().ref(`votes/${voteKey}`)
+    } else {
+      ref = database().ref(`votes/${id}`)
+    }
+
     const snapshot = await ref.once("value")
 
     if (!snapshot.val()) {
@@ -229,15 +264,21 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
       } catch (e) {
         Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
       }
-      goBack()
+    } else {
+      try {
+        await ref.update(data)
+      } catch (e) {
+        Alert.alert("서버에서 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
+      }
     }
+    goBack()
   }
 
   return (
     <View style={FULL}>
       <Screen style={CONTAINER} preset="scroll" backgroundColor={color.palette.lighterPink}>
         <Header
-          headerText="투표를 생성하세요 🗳"
+          headerText={voteKey ? "투표를 수정하세요 🗳" : "투표를 생성하세요 🗳"}
           leftIcon="backB"
           onLeftPress={goBack}
           style={HEADER}
@@ -276,47 +317,53 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
           textStyle={ADD_VOTE_ITEM_TEXT}
           onPress={_setItems}
         />
-        <Text text="시작시간 설정" style={VOTE_ITEM_TITLE} />
-        <View style={VOTE_TIME_SETTING}>
-          <TouchableOpacity onPress={() => _setSdMode("date")}>
-            <Text text={dateformat(sd)} style={VOTE_DATE_TEXT} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => _setSdMode("time")}>
-            <Text text={sd.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
-          </TouchableOpacity>
-        </View>
-        {sdShow && (
-          <DateTimePicker
-            value={sd}
-            // @ts-ignore
-            mode={sdMode}
-            is24Hour={true}
-            display="default"
-            onChange={_setSd}
-            maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
-            minimumDate={new Date()}
-          />
-        )}
-        <Text text="마감시간 설정" style={VOTE_ITEM_TITLE} />
-        <View style={VOTE_TIME_SETTING}>
-          <TouchableOpacity onPress={() => _setDlMode("date")}>
-            <Text text={dateformat(dl)} style={VOTE_DATE_TEXT} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => _setDlMode("time")}>
-            <Text text={dl.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
-          </TouchableOpacity>
-        </View>
-        {dlShow && (
-          <DateTimePicker
-            value={dl}
-            // @ts-ignore
-            mode={dlMode}
-            is24Hour={true}
-            display="default"
-            onChange={_setDl}
-            maximumDate={new Date(new Date().setDate(sd.getDate() + 7))}
-            minimumDate={sd}
-          />
+        {voteKey ? (
+          undefined
+        ) : (
+          <>
+            <Text text="시작시간 설정" style={VOTE_ITEM_TITLE} />
+            <View style={VOTE_TIME_SETTING}>
+              <TouchableOpacity disabled={voteKey !== null} onPress={() => _setSdMode("date")}>
+                <Text text={dateformat(sd)} style={VOTE_DATE_TEXT} />
+              </TouchableOpacity>
+              <TouchableOpacity disabled={voteKey !== null} onPress={() => _setSdMode("time")}>
+                <Text text={sd.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
+              </TouchableOpacity>
+            </View>
+            {sdShow && (
+              <DateTimePicker
+                value={sd}
+                // @ts-ignore
+                mode={sdMode}
+                is24Hour={true}
+                display="default"
+                onChange={_setSd}
+                maximumDate={new Date(new Date().setDate(new Date().getDate() + 7))}
+                minimumDate={new Date()}
+              />
+            )}
+            <Text text="마감시간 설정" style={VOTE_ITEM_TITLE} />
+            <View style={VOTE_TIME_SETTING}>
+              <TouchableOpacity disabled={voteKey !== null} onPress={() => _setDlMode("date")}>
+                <Text text={dateformat(dl)} style={VOTE_DATE_TEXT} />
+              </TouchableOpacity>
+              <TouchableOpacity disabled={voteKey !== null} onPress={() => _setDlMode("time")}>
+                <Text text={dl.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
+              </TouchableOpacity>
+            </View>
+            {dlShow && (
+              <DateTimePicker
+                value={dl}
+                // @ts-ignore
+                mode={dlMode}
+                is24Hour={true}
+                display="default"
+                onChange={_setDl}
+                maximumDate={new Date(new Date().setDate(sd.getDate() + 7))}
+                minimumDate={sd}
+              />
+            )}
+          </>
         )}
       </Screen>
       <SafeAreaView style={FOOTER}>
@@ -324,7 +371,7 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
           <Button
             style={MAKE_VOTE_BUTTON}
             textStyle={MAKE_VOTE_BUTTON_TEXT}
-            text="생성하기"
+            text={voteKey ? "수정하기" : "저장하기"}
             onPress={saveVote}
           />
         </View>
