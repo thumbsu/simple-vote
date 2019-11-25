@@ -1,34 +1,16 @@
 import * as React from "react"
-import {
-  View,
-  Image,
-  SafeAreaView,
-  Alert,
-  RefreshControl,
-  TouchableOpacity,
-} from "react-native"
+import { View, Image, SafeAreaView, Alert, RefreshControl, TouchableOpacity } from "react-native"
 import { NavigationScreenProps } from "react-navigation"
 import { Button, Header, Screen, Text } from "../../components"
 import { color, spacing } from "../../theme"
 import { firebase } from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
-import * as styles from "./styles"
+import { wait, dateformat } from "../../theme/utils"
+import * as styles from "../../theme/styles"
 
-const like = require("./like.png")
-const fire = require("./fire.png")
-const crown = require("./crown.png")
-
-const wait = (timeout: number) => {
-  return new Promise(resolve => {
-    setTimeout(resolve, timeout)
-  })
-}
-
-const dateformat = (timestamp: number) => {
-  const date = new Date(timestamp)
-  return `${date.getFullYear()}년 ${date.getMonth() +
-    1}월 ${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`
-}
+const like = require("../../theme/img/like.png")
+const fire = require("../../theme/img/fire.png")
+const crown = require("../../theme/img/crown.png")
 
 export interface VotelistScreenProps extends NavigationScreenProps<{}> {}
 
@@ -53,10 +35,10 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
 
     list.sort((a, b) => {
       if (a.startTime.timestamp > b.startTime.timestamp) {
-        return 1
+        return -1
       }
       if (a.startTime.timestamp < b.startTime.timestamp) {
-        return -1
+        return 1
       }
       return 0
     })
@@ -138,9 +120,10 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
       [
         {
           text: "수정하기",
-          onPress: () => props.navigation.navigate("createVote", {
-            voteKey: vote.key
-          })
+          onPress: () =>
+            props.navigation.navigate("createVote", {
+              voteKey: vote.key,
+            }),
         },
         {
           text: "삭제하기",
@@ -281,42 +264,51 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
         {votes &&
           votes.map((vote: any) => {
             return (
-              <View key={vote.key} style={styles.VOTE_CONTAINER}>
-                <View style={styles.VOTE_HEADER}>
-                  <View style={{ ...styles.VOTE_HEADER_STATUS, justifyContent: "space-between" }}>
-                    <View style={styles.VOTE_HEADER_STATUS}>
-                      {vote.deadline.timestamp > new Date().getTime() ? (
-                        <>
-                          <Text style={styles.VOTE_STATUS_ACTIVE} text="진행중" />
-                          <Image source={fire} style={styles.VOTE_FIRE} />
-                        </>
-                      ) : (
-                        <Text style={styles.VOTE_STATUS_INACTIVE} text="종료됨" />
+              <TouchableOpacity
+                key={vote.key}
+                onPress={() =>
+                  props.navigation.navigate("voteDetail", {
+                    voteKey: vote.key,
+                  })
+                }
+              >
+                <View style={styles.VOTE_CONTAINER}>
+                  <View style={styles.VOTE_HEADER}>
+                    <View style={{ ...styles.VOTE_HEADER_STATUS, justifyContent: "space-between" }}>
+                      <View style={styles.VOTE_HEADER_STATUS}>
+                        {vote.deadline.timestamp > new Date().getTime() ? (
+                          <>
+                            <Text style={styles.VOTE_STATUS_ACTIVE} text="진행중" />
+                            <Image source={fire} style={styles.VOTE_FIRE} />
+                          </>
+                        ) : (
+                          <Text style={styles.VOTE_STATUS_INACTIVE} text="종료됨" />
+                        )}
+                      </View>
+                      {vote.uid === user.uid && (
+                        <TouchableOpacity onPress={() => manageVote(vote)}>
+                          <Text style={styles.VOTE_STATUS_ACTIVE} text="투표 설정" />
+                        </TouchableOpacity>
                       )}
                     </View>
-                    {vote.uid === user.uid && (
-                      <TouchableOpacity onPress={() => manageVote(vote)}>
-                        <Text style={styles.VOTE_STATUS_ACTIVE} text="투표 설정" />
-                      </TouchableOpacity>
-                    )}
+                    <Text style={styles.VOTE_HEADER_TEXT} text={vote.title} />
+                    <View>
+                      <Text
+                        text={`투표 시작: ${dateformat(vote.startTime.timestamp)}`}
+                        style={styles.VOTE_INFO}
+                      />
+                      <Text
+                        text={`투표 마감: ${dateformat(vote.deadline.timestamp)}`}
+                        style={styles.VOTE_INFO}
+                      />
+                      <Text text={`생성자: ${vote.author}`} style={styles.VOTE_INFO} />
+                    </View>
                   </View>
-                  <Text style={styles.VOTE_HEADER_TEXT} text={vote.title} />
-                  <View>
-                    <Text
-                      text={`투표 시작: ${dateformat(vote.startTime.timestamp)}`}
-                      style={styles.VOTE_INFO}
-                    />
-                    <Text
-                      text={`투표 마감: ${dateformat(vote.deadline.timestamp)}`}
-                      style={styles.VOTE_INFO}
-                    />
-                    <Text text={`생성자: ${vote.author}`} style={styles.VOTE_INFO} />
-                  </View>
+                  {vote.deadline.timestamp < new Date().getTime()
+                    ? renderEndVoteItems(vote)
+                    : renderProgressVoteItems(vote)}
                 </View>
-                {vote.deadline.timestamp < new Date().getTime()
-                  ? renderEndVoteItems(vote)
-                  : renderProgressVoteItems(vote)}
-              </View>
+              </TouchableOpacity>
             )
           })}
       </Screen>

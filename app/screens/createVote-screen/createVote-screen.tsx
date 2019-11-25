@@ -1,107 +1,13 @@
 import * as React from "react"
-import {
-  Platform,
-  TextStyle,
-  View,
-  ViewStyle,
-  SafeAreaView,
-  Alert,
-  TouchableOpacity,
-} from "react-native"
+import { Platform, View, SafeAreaView, Alert, TouchableOpacity } from "react-native"
 import { NavigationScreenProps } from "react-navigation"
 import { Button, Header, Text, Screen, TextField } from "../../components"
-import { color, spacing } from "../../theme"
+import { color } from "../../theme"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { firebase } from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
 import uuid from "react-native-uuid"
-
-const FULL: ViewStyle = { flex: 1 }
-const CONTAINER: ViewStyle = {
-  backgroundColor: color.transparent,
-  paddingHorizontal: spacing[4],
-}
-const BOLD: TextStyle = { fontWeight: "bold" }
-const TEXT: TextStyle = {
-  color: color.palette.black,
-  fontFamily: "Montserrat",
-}
-const HEADER: TextStyle = {
-  paddingTop: spacing[3],
-  paddingBottom: spacing[5] - 1,
-  paddingHorizontal: 0,
-}
-const HEADER_TITLE: TextStyle = {
-  ...BOLD,
-  ...TEXT,
-  fontSize: 12,
-  lineHeight: 15,
-  textAlign: "center",
-  letterSpacing: 1.5,
-}
-const INPUT_TEXT: TextStyle = {
-  ...TEXT,
-  padding: 10,
-  color: color.palette.black,
-}
-const VOTE_ITEM_TITLE: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-}
-const ADD_VOTE_ITEM: ViewStyle = {
-  marginVertical: spacing[3],
-  paddingVertical: 15,
-  paddingHorizontal: spacing[3],
-  borderRadius: 0,
-  backgroundColor: color.palette.white,
-}
-const ADD_VOTE_ITEM_TEXT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 13,
-  letterSpacing: 2,
-  textAlign: "left",
-  color: "gray",
-}
-const MAKE_VOTE_BUTTON: ViewStyle = {
-  paddingVertical: spacing[4],
-  paddingHorizontal: spacing[4],
-  backgroundColor: color.palette.lightPink,
-}
-const MAKE_VOTE_BUTTON_TEXT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 13,
-  letterSpacing: 2,
-}
-const FOOTER: ViewStyle = { backgroundColor: color.palette.babyPink }
-const FOOTER_CONTENT: ViewStyle = {
-  paddingVertical: spacing[4],
-  paddingHorizontal: spacing[4],
-}
-const VOTE_TIME_SETTING: ViewStyle = {
-  paddingVertical: spacing[3],
-  flexDirection: "row",
-  justifyContent: "space-between",
-}
-const VOTE_DATE_TEXT: TextStyle = {
-  ...TEXT,
-}
-const VOTE_TIME_TEXT: TextStyle = {
-  ...TEXT,
-}
-const VOTE_ITEM_DEL: ViewStyle = {
-  marginLeft: spacing[4],
-  padding: 0,
-  borderRadius: 0,
-  marginVertical: spacing[3],
-  backgroundColor: color.palette.lightPink,
-}
-const VOTE_ITEM_DEL_TEXT: TextStyle = {
-  ...TEXT,
-  ...BOLD,
-  fontSize: 15,
-}
+import * as styles from "../../theme/styles"
 
 export interface CreateVoteScreenProps extends NavigationScreenProps<{}> {}
 
@@ -275,37 +181,37 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
   }
 
   return (
-    <View style={FULL}>
-      <Screen style={CONTAINER} preset="scroll" backgroundColor={color.palette.lighterPink}>
+    <View style={styles.FULL}>
+      <Screen style={styles.CONTAINER} preset="scroll" backgroundColor={color.palette.lighterPink}>
         <Header
           headerText={voteKey ? "투표를 수정하세요 🗳" : "투표를 생성하세요 🗳"}
           leftIcon="backB"
           onLeftPress={goBack}
-          style={HEADER}
-          titleStyle={HEADER_TITLE}
+          style={styles.HEADER}
+          titleStyle={styles.HEADER_TITLE}
         />
-        <Text text="투표 제목" style={VOTE_ITEM_TITLE} />
+        <Text text="투표 제목" style={styles.VOTE_ITEM_TITLE} />
         <TextField
           placeholder="제목을 입력해주세요."
-          inputStyle={INPUT_TEXT}
+          inputStyle={styles.INPUT_TEXT}
           value={title}
           onChangeText={setTitle}
         />
-        <Text text="투표 항목" style={VOTE_ITEM_TITLE} />
+        <Text text="투표 항목" style={styles.VOTE_ITEM_TITLE} />
         {items.map((item, i) => {
           return (
             <View key={i} style={{ flexDirection: "row" }}>
               <TextField
                 placeholder={`투표항목 ${i + 1}`}
-                inputStyle={INPUT_TEXT}
+                inputStyle={styles.INPUT_TEXT}
                 value={item.value}
                 onChangeText={text => setItemsValue(item.key, text, i)}
                 style={{ flex: 9 }}
               />
               <Button
                 text="X"
-                style={VOTE_ITEM_DEL}
-                textStyle={VOTE_ITEM_DEL_TEXT}
+                style={styles.VOTE_ITEM_DEL}
+                textStyle={styles.VOTE_ITEM_DEL_TEXT}
                 onPress={() => delItem(i)}
               />
             </View>
@@ -313,21 +219,21 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
         })}
         <Button
           text="투표 항목 추가"
-          style={ADD_VOTE_ITEM}
-          textStyle={ADD_VOTE_ITEM_TEXT}
+          style={styles.ADD_VOTE_ITEM}
+          textStyle={styles.ADD_VOTE_ITEM_TEXT}
           onPress={_setItems}
         />
         {voteKey ? (
           undefined
         ) : (
           <>
-            <Text text="시작시간 설정" style={VOTE_ITEM_TITLE} />
-            <View style={VOTE_TIME_SETTING}>
+            <Text text="시작시간 설정" style={styles.VOTE_ITEM_TITLE} />
+            <View style={styles.VOTE_TIME_SETTING}>
               <TouchableOpacity disabled={voteKey !== null} onPress={() => _setSdMode("date")}>
-                <Text text={dateformat(sd)} style={VOTE_DATE_TEXT} />
+                <Text text={dateformat(sd)} style={styles.VOTE_DATE_TEXT} />
               </TouchableOpacity>
               <TouchableOpacity disabled={voteKey !== null} onPress={() => _setSdMode("time")}>
-                <Text text={sd.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
+                <Text text={sd.toLocaleTimeString()} style={styles.VOTE_TIME_TEXT} />
               </TouchableOpacity>
             </View>
             {sdShow && (
@@ -342,13 +248,13 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
                 minimumDate={new Date()}
               />
             )}
-            <Text text="마감시간 설정" style={VOTE_ITEM_TITLE} />
-            <View style={VOTE_TIME_SETTING}>
+            <Text text="마감시간 설정" style={styles.VOTE_ITEM_TITLE} />
+            <View style={styles.VOTE_TIME_SETTING}>
               <TouchableOpacity disabled={voteKey !== null} onPress={() => _setDlMode("date")}>
-                <Text text={dateformat(dl)} style={VOTE_DATE_TEXT} />
+                <Text text={dateformat(dl)} style={styles.VOTE_DATE_TEXT} />
               </TouchableOpacity>
               <TouchableOpacity disabled={voteKey !== null} onPress={() => _setDlMode("time")}>
-                <Text text={dl.toLocaleTimeString()} style={VOTE_TIME_TEXT} />
+                <Text text={dl.toLocaleTimeString()} style={styles.VOTE_TIME_TEXT} />
               </TouchableOpacity>
             </View>
             {dlShow && (
@@ -366,11 +272,11 @@ export const CreateVoteScreen: React.FunctionComponent<CreateVoteScreenProps> = 
           </>
         )}
       </Screen>
-      <SafeAreaView style={FOOTER}>
-        <View style={FOOTER_CONTENT}>
+      <SafeAreaView style={styles.FOOTER}>
+        <View style={styles.FOOTER_CONTENT}>
           <Button
-            style={MAKE_VOTE_BUTTON}
-            textStyle={MAKE_VOTE_BUTTON_TEXT}
+            style={styles.MAKE_VOTE_BUTTON}
+            textStyle={styles.MAKE_VOTE_BUTTON_TEXT}
             text={voteKey ? "수정하기" : "저장하기"}
             onPress={saveVote}
           />

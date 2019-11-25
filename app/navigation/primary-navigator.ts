@@ -1,9 +1,10 @@
 import createNativeStackNavigator from "react-native-screens/createNativeStackNavigator"
-import { VotelistScreen, CreateVoteScreen } from "../screens"
+import { VotelistScreen, CreateVoteScreen, VoteScreen } from "../screens"
 
 export const PrimaryNavigator = createNativeStackNavigator(
   {
     votelist: { screen: VotelistScreen },
+    voteDetail: { screen: VoteScreen },
     createVote: { screen: CreateVoteScreen },
   },
   {

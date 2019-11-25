@@ -1,8 +1,7 @@
 import * as React from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, TextStyle, ImageStyle, View, Image } from "react-native"
+import { ViewStyle, TextStyle, View } from "react-native"
 import { Screen, Text, Button, Header } from "../../components"
-// import { useStores } from "../models/root-store"
 import { color, spacing } from "../../theme"
 import { NavigationScreenProps } from "react-navigation"
 import { GoogleSignin } from "@react-native-community/google-signin"
@@ -66,8 +65,6 @@ const BUTTON_TEXT: TextStyle = {
 }
 
 export const SigninScreen: React.FunctionComponent<SigninScreenProps> = observer(props => {
-  // const { someStore } = useStores()
-
   const googleSignin = async () => {
     try {
       const { idToken } = await GoogleSignin.signIn()
