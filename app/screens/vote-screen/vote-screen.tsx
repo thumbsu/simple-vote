@@ -210,17 +210,17 @@ export const VoteScreen: React.FunctionComponent<VoteScreenProps> = observer(pro
 
   const renderEndVoteItems = vote => {
     let max = 0
-    let highScoreItem = ""
+    let highScoreItem = []
     let result
     vote.items.forEach(item => {
-      if (item.count > max) {
+      if (item.count !== 0 && item.count >= max) {
         max = item.count
-        highScoreItem = item.value
+        highScoreItem.push(item.value)
       }
     })
 
-    if (!vote.voter || vote.voter.length % vote.items.length === max || max === 0) {
-      // 모두 똑같은 투표 수거나 아무도 투표를 하지 않음
+    if (!vote.voter || max === 0) {
+      // 아무도 투표를 하지 않음
       result = (
         <View>
           <Text
@@ -242,13 +242,20 @@ export const VoteScreen: React.FunctionComponent<VoteScreenProps> = observer(pro
             text="투표 결과"
             style={{ ...styles.TEXT, ...styles.BOLD, marginBottom: spacing[3] }}
           />
-          <View style={styles.VOTE_ITEM_ACTIVE}>
-            <Text style={styles.VOTE_ITEM_TEXT} text={highScoreItem} />
-            <View style={styles.VOTE_ITEM_COUNT_WRAP}>
-              <Image source={crown} style={styles.VOTE_LIKE} />
-              <Text style={styles.VOTE_COUNT} text={`${max}`} />
-            </View>
-          </View>
+          {highScoreItem.map((item: string, i: number) => {
+            return (
+              <View
+                key={`${new Date().getTime()}${item}`}
+                style={{ ...styles.VOTE_ITEM_ACTIVE, marginVertical: 2 }}
+              >
+                <Text style={styles.VOTE_ITEM_TEXT} text={item} />
+                <View style={styles.VOTE_ITEM_COUNT_WRAP}>
+                  <Image source={crown} style={styles.VOTE_LIKE} />
+                  <Text style={styles.VOTE_COUNT} text={`${max}`} />
+                </View>
+              </View>
+            )
+          })}
         </View>
       )
     }
@@ -370,7 +377,9 @@ export const VoteScreen: React.FunctionComponent<VoteScreenProps> = observer(pro
         <View style={styles.COMMENT_CONTAINER}>
           <Text text="댓글" style={styles.COMMENT_HEADER_TEXT} />
           {!vote.comments ? (
-            <Text text="아직 댓글이 없습니다." style={styles.COMMENT_INFO_TEXT} />
+            vote.deadline.timestamp > new Date().getTime() && (
+              <Text text="아직 댓글이 없습니다." style={styles.COMMENT_INFO_TEXT} />
+            )
           ) : (
             <View>
               {vote.comments.map((comment, i) => {

@@ -146,17 +146,17 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
 
   const renderEndVoteItems = vote => {
     let max = 0
-    let highScoreItem = ""
+    let highScoreItem = []
     let result
     vote.items.forEach(item => {
-      if (item.count > max) {
+      if (item.count !== 0 && item.count >= max) {
         max = item.count
-        highScoreItem = item.value
+        highScoreItem.push(item.value)
       }
     })
 
-    if (!vote.voter || vote.voter.length % vote.items.length === max || max === 0) {
-      // 모두 똑같은 투표 수거나 아무도 투표를 하지 않음
+    if (!vote.voter || max === 0) {
+      // 아무도 투표를 하지 않음
       result = (
         <View>
           <Text
@@ -178,13 +178,20 @@ export const VotelistScreen: React.FunctionComponent<VotelistScreenProps> = prop
             text="투표 결과"
             style={{ ...styles.TEXT, ...styles.BOLD, marginBottom: spacing[3] }}
           />
-          <View style={styles.VOTE_ITEM_ACTIVE}>
-            <Text style={styles.VOTE_ITEM_TEXT} text={highScoreItem} />
-            <View style={styles.VOTE_ITEM_COUNT_WRAP}>
-              <Image source={crown} style={styles.VOTE_LIKE} />
-              <Text style={styles.VOTE_COUNT} text={`${max}`} />
-            </View>
-          </View>
+          {highScoreItem.map((item: string, i: number) => {
+            return (
+              <View
+                key={`${new Date().getTime()}${item}`}
+                style={{ ...styles.VOTE_ITEM_ACTIVE, marginVertical: 2 }}
+              >
+                <Text style={styles.VOTE_ITEM_TEXT} text={item} />
+                <View style={styles.VOTE_ITEM_COUNT_WRAP}>
+                  <Image source={crown} style={styles.VOTE_LIKE} />
+                  <Text style={styles.VOTE_COUNT} text={`${max}`} />
+                </View>
+              </View>
+            )
+          })}
         </View>
       )
     }
