@@ -195,6 +195,7 @@ export const VoteScreen: React.FunctionComponent<VoteScreenProps> = observer(pro
               .ref(`votes/${vote.id}`)
               .remove(() => {
                 Alert.alert("투표가 삭제되었습니다.")
+                goBack()
               })
           },
         },
